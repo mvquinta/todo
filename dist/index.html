@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="mvqdev" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>1+Todo List</title>
+
+        <!--Styles-->
+        <link href="./css/main.css" rel="stylesheet" type="text/css" media="all">
+
+        <!--Fonts-->
+        <!--<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300, 400, 700|Advent Pro">-->
+
+        <!--Icons-->
+        <script src="https://unpkg.com/feather-icons"></script>
+    </head>
+
+    <body>
+        <div class="main-wrapper">
+            <div class="top-nav">
+                <nav>
+                    <ul>
+                        <li><a class="icon-menu" href="#"><i data-feather="menu"></i></a></li>
+                        <li><a class="icon-home" href="#"><i data-feather="home"></i></a></li>
+                    </ul>
+                </nav>
+            </div><!--/top-nav-->
+            <div class="side-nav">
+                <nav>
+                    <ul>
+                        <li><a href="#"><i class="icon-inbox" data-feather="inbox"></i>Inbox</a></li>
+                        <li><a href="#"><i class="icon-inbox" data-feather="square"></i>Today</a></li>
+                        <li><a href="#"><i class="icon-inbox" data-feather="briefcase"></i>Projects</a></li>
+                    </ul>
+                </nav>
+            </div><!--/side-nav-->
+            <div class="main-content-wrapper">
+                <div class="main-content">
+                    <h1>1+Todo</h1>
+                    <div class="content">
+                        <div class="task-container">
+                            <h3>Today</h3>
+                            <ul class="task-list">
+                                <div class="task-list-li-container">
+                                    <div class="myTodo">
+                                        <li class="task-item">Example Task</li>
+                                        <button class="btn-trash"><i class="icons-task-items" data-feather="trash"></i></button>
+                                        <button class="btn-check"><i class="icons-task-items" data-feather="check"></i></button>
+                                        <div class="div-task-info">
+                                            <li class="task-comment"> This is a comment for our example task.This is a comment for our example task.</li>
+                                            <button class="disable-btn" disabled><i class="icons-task-info" data-feather="flag"></i></button>
+                                            <button class="disable-btn" disabled>28/02/2021<i class="icons-task-info" data-feather="calendar"></i></button>
+                                        </div><!--/div-task-info-->
+                                    </div><!--/myTodo-->
+                                </div><!--/task-list-li-container-->
+                                <div class="container-add-task">
+                                    <div class="add-task">
+                                        <div class="add-task-text"><button class="btn-add-task"><i class="icons-add-task" data-feather="plus"></i></button> Add Task</div><!--add-task-text-->
+                                    </div><!--/add-task-->
+                                    <div class="div-form-add-task"></div><!--/div-form-add-task-->
+                                </div><!--/container-add-task-->
+                            </ul>
+                        </div><!--/task-container-->
+                    </div><!--/content-->
+                </div><!--/main-content-->
+            </div><!--/main-content-wrapper-->
+        </div> <!--/main-wrapper-->
+
+        <script>feather.replace()</script>
+        <script src="main.js"></script>
+    </body>
+</html>
