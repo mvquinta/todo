@@ -2,16 +2,18 @@ import Todotask from './todoTask'
 
 Todotask()
 
-// const myTask = Todotask('Buy Kiwis', 'The yellow ones', '02-03-2021', 'high')
+const myTask = Todotask('Buy Kiwis', 'The yellow ones', '02-03-2021', 'high')
 // console.log(myTask.title)
 // console.log(myTask.comment)
 // console.log(myTask.duedate)
 // console.log(myTask.priority)
+// console.log(myTask.id)
+//console.log(Object.keys(myTask))
 
 //Get HTML Elements
 const btnAddTask = document.querySelector('.add-task')
 const divFormAddTask = document.querySelector('.div-form-add-task')
-const ulTaskList = document.querySelector('.task-list-li-container')
+const liTaskListContainer = document.querySelector('.task-list-li-container')
 const divTaskContainer = document.querySelector('.task-container')
 
 
@@ -95,15 +97,15 @@ btnAddTask.addEventListener('click', e => {
 
             //When input submitted execute addTask function
             buttonAdd.addEventListener('click', e => {
-                let todoTask = Todotask(formInput.value, formComment.value, dueDate.value, selectPriority.value)
-                //addTask(formInput.value)
-                addTask(todoTask)
-                //Testing how to get and read other values
-                console.log(dueDate.value)
-                console.log(selectPriority.value)
-                console.log(formComment.value)
-                //this calls and updates icons from feather
-                feather.replace()
+                //Check is task name already exist or if input is empty. If so, alerts and ask for a new one
+                if (checkTaskExist(formInput.value) === true || formInput.value === "") {
+                    alert('Task already exists or nothing was written. Please review your task.')
+                } else {
+                    let todoTask = Todotask(formInput.value, formComment.value, dueDate.value, selectPriority.value)
+                    addTask(todoTask)
+                    //this calls and updates icons from feather
+                    feather.replace()
+                }
             })
             const buttonCancel = document.createElement('button')
             buttonCancel.classList.add('btn-add-task')
@@ -124,16 +126,17 @@ divTaskContainer.addEventListener('click', checkTask)
 /****Functions******/
 
 //Add Task function - receives input from form, creates a new task and removes/dels created div form
-function addTask(addedTask) {
+function addTask(todoTask) {
     //first save input to local storage
-    saveLocalTask(addedTask)
+    saveLocalTask(todoTask)
     //execute task creation and form removal
+    //console.log(todoTask.id)
     const divMyTodo = document.createElement('div')
     divMyTodo.classList.add('myTodo')
-    ulTaskList.appendChild(divMyTodo)
+    liTaskListContainer.appendChild(divMyTodo)
     const liTaskItem = document.createElement('li')
     liTaskItem.classList.add('task-item')
-    liTaskItem.innerHTML = addedTask.title
+    liTaskItem.innerHTML = todoTask.title
     divMyTodo.appendChild(liTaskItem)
     const btnTrashTask = document.createElement('button')
     btnTrashTask.innerHTML = '<i class="icons-task-items" data-feather="trash">'
@@ -148,15 +151,23 @@ function addTask(addedTask) {
     divMyTodo.appendChild(divTaskInfo)
     const liTaskComment = document.createElement('li')
     liTaskComment.classList.add('task-comment')
-    liTaskComment.innerHTML = addedTask.comment
+    liTaskComment.innerHTML = todoTask.comment
     divTaskInfo.appendChild(liTaskComment)
     const btnPriority = document.createElement('button')
     btnPriority.classList.add('disable-btn')
     btnPriority.innerHTML = '<i class="icons-task-info" data-feather="flag"></i>'
+    //set flag color based on priority
+    if (todoTask.priority === 'high') {
+        btnPriority.classList.add('highP')
+    } else if ( todoTask.priority === 'medium') {
+        btnPriority.classList.add('mediumP')
+    } else {
+        btnPriority.classList.add('lowP')
+    }
     divTaskInfo.appendChild(btnPriority)
     const btnCalendar = document.createElement('button')
     btnCalendar.classList.add('disable-btn')
-    btnCalendar.innerHTML = addedTask.duedate + '<i class="icons-task-info" data-feather="calendar"></i>'
+    btnCalendar.innerHTML = todoTask.duedate + '<i class="icons-task-info" data-feather="calendar"></i>'
     divTaskInfo.appendChild(btnCalendar)
     const deleteForm = document.querySelector('.div-form')
     deleteForm.remove()
@@ -201,7 +212,7 @@ function restoreLocalTask() {
         //execute task creation and form removal
         const divMyTodo = document.createElement('div')
         divMyTodo.classList.add('myTodo')
-        ulTaskList.appendChild(divMyTodo)
+        liTaskListContainer.appendChild(divMyTodo)
         const liTaskItem = document.createElement('li')
         liTaskItem.classList.add('task-item')
         liTaskItem.innerHTML = task.title
@@ -216,10 +227,10 @@ function restoreLocalTask() {
         divMyTodo.appendChild(btnCheckTask)
         const divTaskInfo = document.createElement('div')
         divTaskInfo.classList.add('div-task-info')
-        divMyTodo.appendChild(divTaskInfo)s
+        divMyTodo.appendChild(divTaskInfo)
         const liTaskComment = document.createElement('li')
         liTaskComment.classList.add('task-comment')
-        liTaskComment.innerHTML = addedTask.comment
+        liTaskComment.innerHTML = task.comment
         divTaskInfo.appendChild(liTaskComment)
         const btnPriority = document.createElement('button')
         btnPriority.classList.add('disable-btn')
@@ -227,7 +238,7 @@ function restoreLocalTask() {
         divTaskInfo.appendChild(btnPriority)
         const btnCalendar = document.createElement('button')
         btnCalendar.classList.add('disable-btn')
-        btnCalendar.innerHTML = addedTask.duedate + '<i class="icons-task-info" data-feather="calendar"></i>'
+        btnCalendar.innerHTML = task.duedate + '<i class="icons-task-info" data-feather="calendar"></i>'
         divTaskInfo.appendChild(btnCalendar)
 
         //const deleteForm = document.querySelector('.div-form')
@@ -240,7 +251,25 @@ function removeLocalTask(task) {
     } else {
         tasks = JSON.parse(localStorage.getItem('tasks'))
     }
-    const taskIndex = task.children[0].innerText
-    tasks.splice(tasks.indexOf(taskIndex), 1)
+    const taskTitle = task.children[0].innerText
+    let taskIndex = tasks.findIndex( task => task.title === taskTitle)
+    tasks.splice(taskIndex, 1)
     localStorage.setItem('tasks', JSON.stringify(tasks))
+}
+
+//Checks if task already exists based on title
+function checkTaskExist(userInput) {
+    let titleExist = false
+    let tasks
+    if (localStorage.getItem('tasks') === null) {
+        tasks = []
+    } else {
+        tasks = JSON.parse(localStorage.getItem('tasks'))
+    }
+    tasks.forEach(function (task) {
+        if (task.title.toLowerCase() === userInput.toLowerCase()) {
+            titleExist = true
+        }
+    })
+    return titleExist
 }
