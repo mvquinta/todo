@@ -189,6 +189,18 @@ h3 {
     pointer-events: none;
 }
 
+.disable-btn.highP {
+    color: var(--main-red);
+}
+
+.disable-btn.mediumP {
+    color: var(--main-yellow);
+}
+
+.disable-btn.lowP {
+    color: var(--main-blue);
+}
+
 /*CSS Form off adding task*/
 
 .container-add-task {
