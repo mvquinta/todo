@@ -1,22 +1,13 @@
 import Todotask from './todoTask'
-
-Todotask()
-
-const myTask = Todotask('Buy Kiwis', 'The yellow ones', '02-03-2021', 'high')
-// console.log(myTask.title)
-// console.log(myTask.comment)
-// console.log(myTask.duedate)
-// console.log(myTask.priority)
-// console.log(myTask.id)
-//console.log(Object.keys(myTask))
+import Projecttodo from './projectTodo'
 
 //Get HTML Elements
 const btnAddTask = document.querySelector('.add-task')
 const divFormAddTask = document.querySelector('.div-form-add-task')
 const liTaskListContainer = document.querySelector('.task-list-li-container')
 const divTaskContainer = document.querySelector('.task-container')
-
-
+const projectName = document.querySelector('.project-name')
+const mainProjectName = document.querySelectorAll('.main-proj-name')
 
 
 /****Event Listeners******/
@@ -95,18 +86,39 @@ btnAddTask.addEventListener('click', e => {
             buttonAdd.innerHTML = 'Add Task'
             divFormBottom.appendChild(buttonAdd)
 
+            //Old logic before implementing Project class. Keeping it for now
             //When input submitted execute addTask function
+            // buttonAdd.addEventListener('click', e => {
+            //     //Check is task name already exist or if input is empty. If so, alerts and ask for a new one
+            //     if (checkTaskExist(formInput.value) === true || formInput.value === "") {
+            //         alert('Task already exists or nothing was written. Please review your task.')
+            //     } else {
+            //         let todoTask = Todotask(formInput.value, formComment.value, dueDate.value, selectPriority.value)
+            //         addTask(todoTask)
+            //         //this calls and updates icons from feather
+            //         feather.replace()
+            //     }
+            // })
+
             buttonAdd.addEventListener('click', e => {
                 //Check is task name already exist or if input is empty. If so, alerts and ask for a new one
                 if (checkTaskExist(formInput.value) === true || formInput.value === "") {
                     alert('Task already exists or nothing was written. Please review your task.')
                 } else {
-                    let todoTask = Todotask(formInput.value, formComment.value, dueDate.value, selectPriority.value)
+                    //Create task object has a project to have be able to filter them and inherit task methods
+                    let todoTask = Projecttodo(projectName.innerHTML)
+                    //read form and inserts data into the object
+                    todoTask.title = formInput.value
+                    todoTask.comment = formComment.value
+                    todoTask.duedate = dueDate.value
+                    todoTask.priority = selectPriority.value
+                    //Executes addTask function that creates the UI task and saves it to local storage
                     addTask(todoTask)
                     //this calls and updates icons from feather
                     feather.replace()
                 }
             })
+
             const buttonCancel = document.createElement('button')
             buttonCancel.classList.add('btn-add-task')
             buttonCancel.id = 'cancelAddTask'
@@ -122,6 +134,15 @@ btnAddTask.addEventListener('click', e => {
 })
 divTaskContainer.addEventListener('click', delTask)
 divTaskContainer.addEventListener('click', checkTask)
+mainProjectName.forEach(item => {
+    item.addEventListener('click', (e) => {
+        const itemClicked = e.target
+        if (itemClicked.classList[0] === 'main-proj-name') {
+            projectName.innerText = itemClicked.innerText
+            //filterProject()
+        }
+    })
+})
 
 /****Functions******/
 
@@ -130,7 +151,6 @@ function addTask(todoTask) {
     //first save input to local storage
     saveLocalTask(todoTask)
     //execute task creation and form removal
-    //console.log(todoTask.id)
     const divMyTodo = document.createElement('div')
     divMyTodo.classList.add('myTodo')
     liTaskListContainer.appendChild(divMyTodo)
@@ -280,3 +300,20 @@ function checkTaskExist(userInput) {
     })
     return titleExist
 }
+
+function filterProject() {
+    let tasks
+    if (localStorage.getItem('tasks') === null) {
+        tasks = []
+    } else {
+        tasks = JSON.parse(localStorage.getItem('tasks'))
+    }
+    tasks.forEach(function (proj) {
+        if (proj.projName === projectName.innerHTML) {
+            console.log(proj.title)
+            //console.log(proj.projName)
+        }
+    })
+}
+
+//filterProject()
