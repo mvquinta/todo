@@ -54,7 +54,7 @@ btnAddTask.addEventListener('click', e => {
             dueDate.setAttribute('placeholder', '')
             form.appendChild(dueDate)
 
-            //Adds a priority selecter with 3 options
+            //Adds a priority selector with 3 options
             const labelPriority = document.createElement('label')
             labelPriority.setAttribute('for', 'priority')
             form.appendChild(labelPriority)
@@ -187,7 +187,6 @@ function checkTask(e) {
         const task = item.parentElement
         task.classList.toggle('checkTask')
     }
-
 }
 
 //Functions to manage local storage - saves, restores and removes
@@ -235,6 +234,14 @@ function restoreLocalTask() {
         const btnPriority = document.createElement('button')
         btnPriority.classList.add('disable-btn')
         btnPriority.innerHTML = '<i class="icons-task-info" data-feather="flag"></i>'
+        //set flag color based on priority
+        if (task.priority === 'high') {
+            btnPriority.classList.add('highP')
+        } else if ( task.priority === 'medium') {
+            btnPriority.classList.add('mediumP')
+        } else {
+            btnPriority.classList.add('lowP')
+        }
         divTaskInfo.appendChild(btnPriority)
         const btnCalendar = document.createElement('button')
         btnCalendar.classList.add('disable-btn')
