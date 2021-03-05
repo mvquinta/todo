@@ -8,6 +8,7 @@ const liTaskListContainer = document.querySelector('.task-list-li-container')
 const divTaskContainer = document.querySelector('.task-container')
 const projectName = document.querySelector('.project-name')
 const mainProjectName = document.querySelectorAll('.main-proj-name')
+const allMyTodo = document.querySelectorAll('.myTodo')
 
 
 /****Event Listeners******/
@@ -132,14 +133,21 @@ btnAddTask.addEventListener('click', e => {
         }
     }
 })
+//Deletes task
 divTaskContainer.addEventListener('click', delTask)
+//Check and check a task
 divTaskContainer.addEventListener('click', checkTask)
+//Rebuilds tasks list when selected project is clicked
 mainProjectName.forEach(item => {
     item.addEventListener('click', (e) => {
-        const itemClicked = e.target
-        if (itemClicked.classList[0] === 'main-proj-name') {
-            projectName.innerText = itemClicked.innerText
-            //filterProject()
+        const selectedProj = e.target
+        if (selectedProj.classList[0] === 'main-proj-name') {
+            //Change name of current project in my main container. (this is important because I read the name from there to know in each project should I save my task
+            projectName.innerText = selectedProj.innerText
+            //Delete all current display tasks (all divs with class = myTodo) and rebuild list based on selected project
+            removeAllMyTodo(liTaskListContainer)
+            filterToRebuildProject()
+            feather.replace() //I always have to call feather to refresh icons
         }
     })
 })
@@ -267,8 +275,6 @@ function restoreLocalTask() {
         btnCalendar.classList.add('disable-btn')
         btnCalendar.innerHTML = task.duedate + '<i class="icons-task-info" data-feather="calendar"></i>'
         divTaskInfo.appendChild(btnCalendar)
-
-        //const deleteForm = document.querySelector('.div-form')
     })
 }
 function removeLocalTask(task) {
@@ -301,7 +307,8 @@ function checkTaskExist(userInput) {
     return titleExist
 }
 
-function filterProject() {
+//Rebuilds task list when a different project is clicked
+function filterToRebuildProject() {
     let tasks
     if (localStorage.getItem('tasks') === null) {
         tasks = []
@@ -310,10 +317,52 @@ function filterProject() {
     }
     tasks.forEach(function (proj) {
         if (proj.projName === projectName.innerHTML) {
-            console.log(proj.title)
-            //console.log(proj.projName)
+            const divMyTodo = document.createElement('div')
+            divMyTodo.classList.add('myTodo')
+            liTaskListContainer.appendChild(divMyTodo)
+            const liTaskItem = document.createElement('li')
+            liTaskItem.classList.add('task-item')
+            liTaskItem.innerHTML = proj.title
+            divMyTodo.appendChild(liTaskItem)
+            const btnTrashTask = document.createElement('button')
+            btnTrashTask.innerHTML = '<i class="icons-task-items" data-feather="trash">'
+            btnTrashTask.classList.add('btn-trash')
+            divMyTodo.appendChild(btnTrashTask)
+            const btnCheckTask = document.createElement('button')
+            btnCheckTask.innerHTML = '<i class="icons-task-items" data-feather="check"></i>'
+            btnCheckTask.classList.add('btn-check')
+            divMyTodo.appendChild(btnCheckTask)
+            const divTaskInfo = document.createElement('div')
+            divTaskInfo.classList.add('div-task-info')
+            divMyTodo.appendChild(divTaskInfo)
+            const liTaskComment = document.createElement('li')
+            liTaskComment.classList.add('task-comment')
+            liTaskComment.innerHTML = proj.comment
+            divTaskInfo.appendChild(liTaskComment)
+            const btnPriority = document.createElement('button')
+            btnPriority.classList.add('disable-btn')
+            btnPriority.innerHTML = '<i class="icons-task-info" data-feather="flag"></i>'
+            //set flag color based on priority
+            if (proj.priority === 'high') {
+                btnPriority.classList.add('highP')
+            } else if ( proj.priority === 'medium') {
+                btnPriority.classList.add('mediumP')
+            } else {
+                btnPriority.classList.add('lowP')
+            }
+            divTaskInfo.appendChild(btnPriority)
+            const btnCalendar = document.createElement('button')
+            btnCalendar.classList.add('disable-btn')
+            btnCalendar.innerHTML = proj.duedate + '<i class="icons-task-info" data-feather="calendar"></i>'
+            divTaskInfo.appendChild(btnCalendar)
         }
     })
 }
 
-//filterProject()
+//Removes all current display tasks. It's executed before filterToRebuildProject and only deletes html elements. localStorage stays untouched.
+function removeAllMyTodo(parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild)
+    }
+}
+

@@ -107,6 +107,25 @@ NAV BARS TOP AND SIDE
     padding-right: 5px;
 }
 
+.add-task-proj {
+    margin-left: 30px;
+    color: var(--main-light-gray);
+}
+
+.btn-add-proj {
+    border: none;
+    color: var(--main-red);
+    background: transparent;
+    border-radius: 4px;
+    transform: translateY(6px);
+    cursor: pointer;
+}
+
+.btn-add-proj:hover {
+    color: var(--main-text-color);
+    background-color: var(--main-red);
+}
+
 /*******
 MAIN CONTENT
 *******/
@@ -125,9 +144,6 @@ h1 {
     width: auto;
     height: 100%;
     /*position: relative;*/
-}
-
-.task-container {
 }
 
 h3 {
