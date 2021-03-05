@@ -8,7 +8,9 @@ const liTaskListContainer = document.querySelector('.task-list-li-container')
 const divTaskContainer = document.querySelector('.task-container')
 const projectName = document.querySelector('.project-name')
 const mainProjectName = document.querySelectorAll('.main-proj-name')
-const allMyTodo = document.querySelectorAll('.myTodo')
+const btnAddProj = document.querySelector('.btn-add-proj')
+const divFormAddProj = document.querySelector('.div-for-add-proj')
+const ulProjectsList = document.querySelector('.ul-projects-list')
 
 
 /****Event Listeners******/
@@ -87,27 +89,18 @@ btnAddTask.addEventListener('click', e => {
             buttonAdd.innerHTML = 'Add Task'
             divFormBottom.appendChild(buttonAdd)
 
-            //Old logic before implementing Project class. Keeping it for now
-            //When input submitted execute addTask function
-            // buttonAdd.addEventListener('click', e => {
-            //     //Check is task name already exist or if input is empty. If so, alerts and ask for a new one
-            //     if (checkTaskExist(formInput.value) === true || formInput.value === "") {
-            //         alert('Task already exists or nothing was written. Please review your task.')
-            //     } else {
-            //         let todoTask = Todotask(formInput.value, formComment.value, dueDate.value, selectPriority.value)
-            //         addTask(todoTask)
-            //         //this calls and updates icons from feather
-            //         feather.replace()
-            //     }
-            // })
-
             buttonAdd.addEventListener('click', e => {
                 //Check is task name already exist or if input is empty. If so, alerts and ask for a new one
                 if (checkTaskExist(formInput.value) === true || formInput.value === "") {
                     alert('Task already exists or nothing was written. Please review your task.')
                 } else {
-                    //Create task object has a project to have be able to filter them and inherit task methods
-                    let todoTask = Projecttodo(projectName.innerHTML)
+                    //Create taskTask as a project object to be able to filter and inherit task object methods
+                    let todoTask
+                    if (projectName.innerHTML === 'All Projects') {
+                        todoTask = Projecttodo('Inbox')
+                    } else {
+                        todoTask = Projecttodo(projectName.innerHTML)
+                    }
                     //read form and inserts data into the object
                     todoTask.title = formInput.value
                     todoTask.comment = formComment.value
@@ -138,18 +131,38 @@ divTaskContainer.addEventListener('click', delTask)
 //Check and check a task
 divTaskContainer.addEventListener('click', checkTask)
 //Rebuilds tasks list when selected project is clicked
-mainProjectName.forEach(item => {
-    item.addEventListener('click', (e) => {
-        const selectedProj = e.target
-        if (selectedProj.classList[0] === 'main-proj-name') {
-            //Change name of current project in my main container. (this is important because I read the name from there to know in each project should I save my task
-            projectName.innerText = selectedProj.innerText
-            //Delete all current display tasks (all divs with class = myTodo) and rebuild list based on selected project
-            removeAllMyTodo(liTaskListContainer)
-            filterToRebuildProject()
-            feather.replace() //I always have to call feather to refresh icons
-        }
-    })
+// mainProjectName.forEach(item => {
+//     item.addEventListener('click', (e) => {
+//         const selectedProj = e.target
+//         console.log(e.target)
+//         if (selectedProj.classList[0] === 'main-proj-name' || selectedProj.classList[0] === 'new-proj-name') {
+//             //Change name of current project in my main container. (this is important because I read the name from there to know in each project should I save my task
+//             projectName.innerText = selectedProj.innerText
+//             //Delete all current display tasks (all divs with class = myTodo) and rebuild list based on selected project
+//             removeAllMyTodo(liTaskListContainer)
+//             filterToRebuildProject()
+//             feather.replace() //I always have to call feather to refresh icons
+//         }
+//     })
+// })
+//Adds a Project
+btnAddProj.addEventListener('click', addProject)
+
+//Rebuild task list when new project is cli
+document.addEventListener('click', (e) => {
+    const selectedProj = e.target
+    console.log(e.target)
+    console.log(selectedProj.classList[0])
+    console.log(selectedProj.innerText)
+    console.log(projectName.innerText)
+    if (selectedProj.classList[0] === 'main-proj-name' || selectedProj.classList[0] === 'new-proj-name') {
+        //Change name of current project in my main container. (this is important because I read the name from there to know in each project should I save my task
+        projectName.innerText = selectedProj.innerText
+        //Delete all current display tasks (all divs with class = myTodo) and rebuild list based on selected project
+        removeAllMyTodo(liTaskListContainer)
+        filterToRebuildProject()
+        feather.replace() //I always have to call feather to refresh icons
+    }
 })
 
 /****Functions******/
@@ -197,6 +210,7 @@ function addTask(todoTask) {
     btnCalendar.classList.add('disable-btn')
     btnCalendar.innerHTML = todoTask.duedate + '<i class="icons-task-info" data-feather="calendar"></i>'
     divTaskInfo.appendChild(btnCalendar)
+    //Deletes add task form
     const deleteForm = document.querySelector('.div-form')
     deleteForm.remove()
 }
@@ -217,6 +231,63 @@ function checkTask(e) {
     }
 }
 
+//Add Project Function
+function addProject() {
+    //Creates main Form structure
+    const divProjForm = document.createElement('div')
+    divProjForm.classList.add('div-form-proj')
+    divFormAddProj.appendChild(divProjForm)
+    const formProj = document.createElement('form')
+    formProj.classList.add('form-add-proj')
+    formProj.id = 'addProjForm'
+    divProjForm.appendChild(formProj)
+    //Adds main task input
+    const formProjInput = document.createElement('input')
+    formProjInput.classList.add('input-add-proj')
+    formProjInput.setAttribute('type', 'text')
+    formProj.appendChild(formProjInput)
+    formProjInput.focus()
+
+    //Creates Add and Cancel buttons and respective logic
+    const buttonAddProj = document.createElement('button')
+    buttonAddProj.classList.add('btn-add-task')
+    buttonAddProj.id = 'confirmAddProj'
+    buttonAddProj.innerHTML = 'Add Project'
+    divProjForm.appendChild(buttonAddProj)
+
+    //If Add button is clicked, add project name under Projects li tag
+    buttonAddProj.addEventListener('click', e => {
+        if (checkProjExist(formProjInput.value) === true || formProjInput.value === "") {
+            alert('Task already exists or nothing was written. Please review your task.')
+        } else {
+            let todoProject = Projecttodo(formProjInput.value)
+            saveLocalTask(todoProject)
+            const liProjectName = document.createElement('li')
+            ulProjectsList.appendChild(liProjectName)
+            const aProjName = document.createElement('a')
+            aProjName.setAttribute('href', '#')
+            aProjName.classList.add('new-proj-name')
+            aProjName.innerHTML = todoProject.projName
+            liProjectName.appendChild(aProjName)
+        }
+
+        //deleted add project form
+        divProjForm.remove()
+    })
+
+
+    const buttonCancelProj = document.createElement('button')
+    buttonCancelProj.classList.add('btn-add-task')
+    buttonCancelProj.id = 'cancelAddProj'
+    buttonCancelProj.innerHTML = 'Cancel'
+    divProjForm.appendChild(buttonCancelProj)
+
+    //If cancel button is clicked created div form is deleted
+    buttonCancelProj.addEventListener('click', e => {
+        divProjForm.remove()
+    })
+}
+
 //Functions to manage local storage - saves, restores and removes
 function saveLocalTask(task) {
     let tasks
@@ -228,7 +299,7 @@ function saveLocalTask(task) {
     tasks.push(task)
     localStorage.setItem('tasks', JSON.stringify(tasks))
 }
-function restoreLocalTask() {
+function restoreLocalTask(task) {
     let tasks
     if (localStorage.getItem('tasks') === null) {
         tasks = []
@@ -236,45 +307,59 @@ function restoreLocalTask() {
         tasks = JSON.parse(localStorage.getItem('tasks'))
     }
     tasks.forEach(function (task) {
-        //execute task creation and form removal
-        const divMyTodo = document.createElement('div')
-        divMyTodo.classList.add('myTodo')
-        liTaskListContainer.appendChild(divMyTodo)
-        const liTaskItem = document.createElement('li')
-        liTaskItem.classList.add('task-item')
-        liTaskItem.innerHTML = task.title
-        divMyTodo.appendChild(liTaskItem)
-        const btnTrashTask = document.createElement('button')
-        btnTrashTask.innerHTML = '<i class="icons-task-items" data-feather="trash">'
-        btnTrashTask.classList.add('btn-trash')
-        divMyTodo.appendChild(btnTrashTask)
-        const btnCheckTask = document.createElement('button')
-        btnCheckTask.innerHTML = '<i class="icons-task-items" data-feather="check"></i>'
-        btnCheckTask.classList.add('btn-check')
-        divMyTodo.appendChild(btnCheckTask)
-        const divTaskInfo = document.createElement('div')
-        divTaskInfo.classList.add('div-task-info')
-        divMyTodo.appendChild(divTaskInfo)
-        const liTaskComment = document.createElement('li')
-        liTaskComment.classList.add('task-comment')
-        liTaskComment.innerHTML = task.comment
-        divTaskInfo.appendChild(liTaskComment)
-        const btnPriority = document.createElement('button')
-        btnPriority.classList.add('disable-btn')
-        btnPriority.innerHTML = '<i class="icons-task-info" data-feather="flag"></i>'
-        //set flag color based on priority
-        if (task.priority === 'high') {
-            btnPriority.classList.add('highP')
-        } else if ( task.priority === 'medium') {
-            btnPriority.classList.add('mediumP')
+        //this first condition checks if the current object in the loop is a project object and not a task object
+        //if it is a project object. It returns 0, ignores it, and moves on to the next element in the loop
+        //This is needed because if not, I would rebuild the list with an undefined task
+        if (Object.keys(task).length <= 2) {
+            const liProjectName = document.createElement('li')
+            ulProjectsList.appendChild(liProjectName)
+            const aProjName = document.createElement('a')
+            aProjName.setAttribute('href', '#')
+            aProjName.classList.add('new-proj-name')
+            aProjName.innerHTML = task.projName
+            liProjectName.appendChild(aProjName)
+            //return 0
         } else {
-            btnPriority.classList.add('lowP')
+            //execute task creation and form removal
+            const divMyTodo = document.createElement('div')
+            divMyTodo.classList.add('myTodo')
+            liTaskListContainer.appendChild(divMyTodo)
+            const liTaskItem = document.createElement('li')
+            liTaskItem.classList.add('task-item')
+            liTaskItem.innerHTML = task.title
+            divMyTodo.appendChild(liTaskItem)
+            const btnTrashTask = document.createElement('button')
+            btnTrashTask.innerHTML = '<i class="icons-task-items" data-feather="trash">'
+            btnTrashTask.classList.add('btn-trash')
+            divMyTodo.appendChild(btnTrashTask)
+            const btnCheckTask = document.createElement('button')
+            btnCheckTask.innerHTML = '<i class="icons-task-items" data-feather="check"></i>'
+            btnCheckTask.classList.add('btn-check')
+            divMyTodo.appendChild(btnCheckTask)
+            const divTaskInfo = document.createElement('div')
+            divTaskInfo.classList.add('div-task-info')
+            divMyTodo.appendChild(divTaskInfo)
+            const liTaskComment = document.createElement('li')
+            liTaskComment.classList.add('task-comment')
+            liTaskComment.innerHTML = task.comment
+            divTaskInfo.appendChild(liTaskComment)
+            const btnPriority = document.createElement('button')
+            btnPriority.classList.add('disable-btn')
+            btnPriority.innerHTML = '<i class="icons-task-info" data-feather="flag"></i>'
+            //set flag color based on priority
+            if (task.priority === 'high') {
+                btnPriority.classList.add('highP')
+            } else if ( task.priority === 'medium') {
+                btnPriority.classList.add('mediumP')
+            } else {
+                btnPriority.classList.add('lowP')
+            }
+            divTaskInfo.appendChild(btnPriority)
+            const btnCalendar = document.createElement('button')
+            btnCalendar.classList.add('disable-btn')
+            btnCalendar.innerHTML = task.duedate + '<i class="icons-task-info" data-feather="calendar"></i>'
+            divTaskInfo.appendChild(btnCalendar)
         }
-        divTaskInfo.appendChild(btnPriority)
-        const btnCalendar = document.createElement('button')
-        btnCalendar.classList.add('disable-btn')
-        btnCalendar.innerHTML = task.duedate + '<i class="icons-task-info" data-feather="calendar"></i>'
-        divTaskInfo.appendChild(btnCalendar)
     })
 }
 function removeLocalTask(task) {
@@ -300,11 +385,35 @@ function checkTaskExist(userInput) {
         tasks = JSON.parse(localStorage.getItem('tasks'))
     }
     tasks.forEach(function (task) {
-        if (task.title.toLowerCase() === userInput.toLowerCase()) {
-            titleExist = true
+        //this first condition checks if the current object in loop is a task or a projec
+        //if its a project object, it wont have a title, so it will be ignored. This way, If I want, I can have a task with the same name as project
+        //this also haves to exist for loop not to break looking for a task.title where it does not exist
+        if (task.title === undefined) {
+            return 0
+        } else {
+            if (task.title.toLowerCase() === userInput.toLowerCase()) {
+                titleExist = true
+            }
         }
     })
     return titleExist
+}
+
+//Checks if project already exists based on title
+function checkProjExist(userInput) {
+    let projExist = false
+    let tasks
+    if (localStorage.getItem('tasks') === null) {
+        tasks = []
+    } else {
+        tasks = JSON.parse(localStorage.getItem('tasks'))
+    }
+    tasks.forEach(function (task) {
+        if (task.projName.toLowerCase() === userInput.toLowerCase()) {
+            projExist = true
+        }
+    })
+    return projExist
 }
 
 //Rebuilds task list when a different project is clicked
