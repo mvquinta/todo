@@ -1,9 +1,7 @@
-import Todotask from './todoTask'
 import Projecttodo from './projectTodo'
 
-console.log('D')
-
 //Get HTML Elements
+const homeone = document.querySelector('.home-h1')
 const btnAddTask = document.querySelector('.add-task')
 const divFormAddTask = document.querySelector('.div-form-add-task')
 const liTaskListContainer = document.querySelector('.task-list-li-container')
@@ -14,6 +12,10 @@ const divFormAddProj = document.querySelector('.div-for-add-proj')
 const ulProjectsList = document.querySelector('.ul-projects-list')
 
 /****Event Listeners******/
+//Refresh site home page
+homeone.addEventListener('click', () => {
+    location.reload();
+})
 //Restores local storage and task list when page is loaded or refreshed
 document.addEventListener('DOMContentLoaded', () => {
     restoreLocalTask()
@@ -37,6 +39,7 @@ btnAddTask.addEventListener('click', e => {
             const formInput = document.createElement('input')
             formInput.classList.add('input-add-task')
             formInput.setAttribute('type', 'text')
+            formInput.setAttribute('placeholder', 'Add a task')
             form.appendChild(formInput)
             formInput.focus()
 
@@ -278,7 +281,7 @@ function addProject() {
 
     //Creates Add and Cancel buttons and respective logic
     const buttonAddProj = document.createElement('button')
-    buttonAddProj.classList.add('btn-add-task')
+    buttonAddProj.classList.add('btn-add-project')
     buttonAddProj.id = 'confirmAddProj'
     buttonAddProj.innerHTML = 'Add Project'
     divProjForm.appendChild(buttonAddProj)
@@ -310,7 +313,7 @@ function addProject() {
 
 
     const buttonCancelProj = document.createElement('button')
-    buttonCancelProj.classList.add('btn-add-task')
+    buttonCancelProj.classList.add('btn-cancel-project')
     buttonCancelProj.id = 'cancelAddProj'
     buttonCancelProj.innerHTML = 'Cancel'
     divProjForm.appendChild(buttonCancelProj)
