@@ -11,13 +11,14 @@ function Projecttodo(projName) {
     )
 }
 
-function Tasktodo(title, comment, duedate, priority) {
+function Tasktodo(title, comment, duedate, priority, done = false) {
     let todotask = {
         id: Date.now(),
         title,
         comment,
         duedate,
-        priority
+        priority,
+        done
     }
 
     return Object.assign(

@@ -1,17 +1,17 @@
 import Todotask from './todoTask'
 import Projecttodo from './projectTodo'
 
+console.log('D')
+
 //Get HTML Elements
 const btnAddTask = document.querySelector('.add-task')
 const divFormAddTask = document.querySelector('.div-form-add-task')
 const liTaskListContainer = document.querySelector('.task-list-li-container')
 const divTaskContainer = document.querySelector('.task-container')
 const projectName = document.querySelector('.project-name')
-const mainProjectName = document.querySelectorAll('.main-proj-name')
 const btnAddProj = document.querySelector('.btn-add-proj')
 const divFormAddProj = document.querySelector('.div-for-add-proj')
 const ulProjectsList = document.querySelector('.ul-projects-list')
-
 
 /****Event Listeners******/
 //Restores local storage and task list when page is loaded or refreshed
@@ -130,31 +130,11 @@ btnAddTask.addEventListener('click', e => {
 divTaskContainer.addEventListener('click', delTask)
 //Check and check a task
 divTaskContainer.addEventListener('click', checkTask)
-//Rebuilds tasks list when selected project is clicked
-// mainProjectName.forEach(item => {
-//     item.addEventListener('click', (e) => {
-//         const selectedProj = e.target
-//         console.log(e.target)
-//         if (selectedProj.classList[0] === 'main-proj-name' || selectedProj.classList[0] === 'new-proj-name') {
-//             //Change name of current project in my main container. (this is important because I read the name from there to know in each project should I save my task
-//             projectName.innerText = selectedProj.innerText
-//             //Delete all current display tasks (all divs with class = myTodo) and rebuild list based on selected project
-//             removeAllMyTodo(liTaskListContainer)
-//             filterToRebuildProject()
-//             feather.replace() //I always have to call feather to refresh icons
-//         }
-//     })
-// })
 //Adds a Project
 btnAddProj.addEventListener('click', addProject)
-
-//Rebuild task list when new project is cli
+//Rebuild task list when new project is clicked - but is always listening for every click
 document.addEventListener('click', (e) => {
     const selectedProj = e.target
-    console.log(e.target)
-    console.log(selectedProj.classList[0])
-    console.log(selectedProj.innerText)
-    console.log(projectName.innerText)
     if (selectedProj.classList[0] === 'main-proj-name' || selectedProj.classList[0] === 'new-proj-name') {
         //Change name of current project in my main container. (this is important because I read the name from there to know in each project should I save my task
         projectName.innerText = selectedProj.innerText
@@ -162,6 +142,16 @@ document.addEventListener('click', (e) => {
         removeAllMyTodo(liTaskListContainer)
         filterToRebuildProject()
         feather.replace() //I always have to call feather to refresh icons
+    }
+})
+//Deletes Project
+document.addEventListener('click', (e) => {
+    const selectedDelProj = e.target
+    if (selectedDelProj.classList[0] === 'btn-del-proj') {
+        //console.log(selectedDelProj.parentElement.innerText)
+        //console.log(typeof selectedDelProj.parentElement.innerText)
+        deleteLocalProject(selectedDelProj.parentElement.innerText)
+        delProject(e)
     }
 })
 
@@ -221,13 +211,51 @@ function delTask(e) {
         removeLocalTask(task)
         task.remove()
     }
-    //removeLocalTask(task)
 }
 function checkTask(e) {
     const item = e.target
     if (item.classList[0] === 'btn-check') {
         const task = item.parentElement
         task.classList.toggle('checkTask')
+        const taskTitle = task.firstChild
+        //console.log(a.innerText)
+        toggleDone(taskTitle.innerText)
+    }
+}
+
+function toggleDone(taskTitle) {
+    let tasks
+    if (localStorage.getItem('tasks') === null) {
+        tasks = []
+    } else {
+        tasks = JSON.parse(localStorage.getItem('tasks'))
+    }
+    tasks.forEach(function(task) {
+        if(task.title === taskTitle) {
+            if(task.done === false) {
+                task.done = true
+                console.log('im here')
+                console.log(task.done)
+                localStorage.setItem('tasks', JSON.stringify(tasks))
+            } else if (task.done === true) {
+                console.log('im there')
+                task.done = false
+                console.log(task.done)
+                localStorage.setItem('tasks', JSON.stringify(tasks))
+            }
+        }
+    })
+    // const taskTitle = task.children[0].innerText
+    // let taskIndex = tasks.findIndex( task => task.title === taskTitle)
+    // tasks.splice(taskIndex, 1)
+    // localStorage.setItem('tasks', JSON.stringify(tasks))
+}
+
+function delProject(e) {
+    const item = e.target
+    if (item.classList[0] === 'btn-del-proj') {
+        const projDel = item.parentElement.parentElement
+        projDel.remove()
     }
 }
 
@@ -268,7 +296,12 @@ function addProject() {
             aProjName.setAttribute('href', '#')
             aProjName.classList.add('new-proj-name')
             aProjName.innerHTML = todoProject.projName
+            const btnDelProj = document.createElement('button')
+            btnDelProj.classList.add('btn-del-proj')
+            btnDelProj.innerHTML = '<i class="icons-task-items" data-feather="trash">'
+            aProjName.appendChild(btnDelProj)
             liProjectName.appendChild(aProjName)
+            feather.replace()
         }
 
         //deleted add project form
@@ -308,18 +341,22 @@ function restoreLocalTask(task) {
     }
     tasks.forEach(function (task) {
         //this first condition checks if the current object in the loop is a project object and not a task object
-        //if it is a project object. It returns 0, ignores it, and moves on to the next element in the loop
-        //This is needed because if not, I would rebuild the list with an undefined task
-        if (Object.keys(task).length <= 2) {
+        //if length is 2, than it only haves to keys -project name and ID - so it is a project object.
+        //I build side man UI with project names. Else, I build task list
+        if (Object.keys(task).length <= 3) {
             const liProjectName = document.createElement('li')
             ulProjectsList.appendChild(liProjectName)
             const aProjName = document.createElement('a')
             aProjName.setAttribute('href', '#')
             aProjName.classList.add('new-proj-name')
             aProjName.innerHTML = task.projName
+            const btnDelProj = document.createElement('button')
+            btnDelProj.classList.add('btn-del-proj')
+            btnDelProj.innerHTML = '<i class="icons-task-items" data-feather="trash">'
+            aProjName.appendChild(btnDelProj)
             liProjectName.appendChild(aProjName)
-            //return 0
-        } else {
+            feather.replace()
+        } else if (Object.keys(task).length >= 4) {
             //execute task creation and form removal
             const divMyTodo = document.createElement('div')
             divMyTodo.classList.add('myTodo')
@@ -359,6 +396,12 @@ function restoreLocalTask(task) {
             btnCalendar.classList.add('disable-btn')
             btnCalendar.innerHTML = task.duedate + '<i class="icons-task-info" data-feather="calendar"></i>'
             divTaskInfo.appendChild(btnCalendar)
+            //Checks if task is done. If so, adds checkTask class for it be rendered as completed
+            if (task.done === true) {
+                divMyTodo.classList.add('checkTask')
+            }
+        } else {
+            return 0
         }
     })
 }
@@ -373,6 +416,34 @@ function removeLocalTask(task) {
     let taskIndex = tasks.findIndex( task => task.title === taskTitle)
     tasks.splice(taskIndex, 1)
     localStorage.setItem('tasks', JSON.stringify(tasks))
+}
+function deleteLocalProject(projDel) {
+    let tasks
+    let count = 0
+    if (localStorage.getItem('tasks') === null) {
+        tasks = []
+    } else {
+        tasks = JSON.parse(localStorage.getItem('tasks'))
+    }
+    //I run into a problem where my forEach was only deleting one task at the time and not all at once
+    //The workaround I found was to get the number of items I have with the same projec name and repeat the delete cycle that same number of times
+    //So I have a first forEach where I count the number of items and a second forEach where I implement the logic to finnaly delete
+    //this should work with only one forEach. I'm missing something
+    tasks.forEach(function(task) {
+        if (task.projName === projDel) {
+            count += 1
+        }
+    })
+    for (let i = 0; i = count; i++) {
+        tasks.forEach(function(task) {
+            if (task.projName === projDel) {
+                let taskIndex = tasks.findIndex ( task => task.projName === projDel )
+                tasks.splice(taskIndex, 1)
+                localStorage.setItem('tasks', JSON.stringify(tasks))
+            }
+        })
+        count -= 1
+    }
 }
 
 //Checks if task already exists based on title
@@ -398,7 +469,6 @@ function checkTaskExist(userInput) {
     })
     return titleExist
 }
-
 //Checks if project already exists based on title
 function checkProjExist(userInput) {
     let projExist = false
@@ -425,49 +495,58 @@ function filterToRebuildProject() {
         tasks = JSON.parse(localStorage.getItem('tasks'))
     }
     tasks.forEach(function (proj) {
-        if (proj.projName === projectName.innerHTML) {
-            const divMyTodo = document.createElement('div')
-            divMyTodo.classList.add('myTodo')
-            liTaskListContainer.appendChild(divMyTodo)
-            const liTaskItem = document.createElement('li')
-            liTaskItem.classList.add('task-item')
-            liTaskItem.innerHTML = proj.title
-            divMyTodo.appendChild(liTaskItem)
-            const btnTrashTask = document.createElement('button')
-            btnTrashTask.innerHTML = '<i class="icons-task-items" data-feather="trash">'
-            btnTrashTask.classList.add('btn-trash')
-            divMyTodo.appendChild(btnTrashTask)
-            const btnCheckTask = document.createElement('button')
-            btnCheckTask.innerHTML = '<i class="icons-task-items" data-feather="check"></i>'
-            btnCheckTask.classList.add('btn-check')
-            divMyTodo.appendChild(btnCheckTask)
-            const divTaskInfo = document.createElement('div')
-            divTaskInfo.classList.add('div-task-info')
-            divMyTodo.appendChild(divTaskInfo)
-            const liTaskComment = document.createElement('li')
-            liTaskComment.classList.add('task-comment')
-            liTaskComment.innerHTML = proj.comment
-            divTaskInfo.appendChild(liTaskComment)
-            const btnPriority = document.createElement('button')
-            btnPriority.classList.add('disable-btn')
-            btnPriority.innerHTML = '<i class="icons-task-info" data-feather="flag"></i>'
-            //set flag color based on priority
-            if (proj.priority === 'high') {
-                btnPriority.classList.add('highP')
-            } else if ( proj.priority === 'medium') {
-                btnPriority.classList.add('mediumP')
-            } else {
-                btnPriority.classList.add('lowP')
+        //If object length is 2 or less, it means its a project object and not a task. So ignore it and dont try to build UI for it
+        if (Object.keys(proj).length <= 3) {
+            return 0
+        } else {
+            if (proj.projName === projectName.innerHTML) {
+                const divMyTodo = document.createElement('div')
+                divMyTodo.classList.add('myTodo')
+                liTaskListContainer.appendChild(divMyTodo)
+                const liTaskItem = document.createElement('li')
+                liTaskItem.classList.add('task-item')
+                liTaskItem.innerHTML = proj.title
+                divMyTodo.appendChild(liTaskItem)
+                const btnTrashTask = document.createElement('button')
+                btnTrashTask.innerHTML = '<i class="icons-task-items" data-feather="trash">'
+                btnTrashTask.classList.add('btn-trash')
+                divMyTodo.appendChild(btnTrashTask)
+                const btnCheckTask = document.createElement('button')
+                btnCheckTask.innerHTML = '<i class="icons-task-items" data-feather="check"></i>'
+                btnCheckTask.classList.add('btn-check')
+                divMyTodo.appendChild(btnCheckTask)
+                const divTaskInfo = document.createElement('div')
+                divTaskInfo.classList.add('div-task-info')
+                divMyTodo.appendChild(divTaskInfo)
+                const liTaskComment = document.createElement('li')
+                liTaskComment.classList.add('task-comment')
+                liTaskComment.innerHTML = proj.comment
+                divTaskInfo.appendChild(liTaskComment)
+                const btnPriority = document.createElement('button')
+                btnPriority.classList.add('disable-btn')
+                btnPriority.innerHTML = '<i class="icons-task-info" data-feather="flag"></i>'
+                //set flag color based on priority
+                if (proj.priority === 'high') {
+                    btnPriority.classList.add('highP')
+                } else if ( proj.priority === 'medium') {
+                    btnPriority.classList.add('mediumP')
+                } else {
+                    btnPriority.classList.add('lowP')
+                }
+                divTaskInfo.appendChild(btnPriority)
+                const btnCalendar = document.createElement('button')
+                btnCalendar.classList.add('disable-btn')
+                btnCalendar.innerHTML = proj.duedate + '<i class="icons-task-info" data-feather="calendar"></i>'
+                divTaskInfo.appendChild(btnCalendar)
+                //Checks if task is done. If so, adds checkTask class for it be rendered as completed
+                if (proj.done === true) {
+                    divMyTodo.classList.add('checkTask')
+                }
+
             }
-            divTaskInfo.appendChild(btnPriority)
-            const btnCalendar = document.createElement('button')
-            btnCalendar.classList.add('disable-btn')
-            btnCalendar.innerHTML = proj.duedate + '<i class="icons-task-info" data-feather="calendar"></i>'
-            divTaskInfo.appendChild(btnCalendar)
         }
     })
 }
-
 //Removes all current display tasks. It's executed before filterToRebuildProject and only deletes html elements. localStorage stays untouched.
 function removeAllMyTodo(parent) {
     while (parent.firstChild) {
