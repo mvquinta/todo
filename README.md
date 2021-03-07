@@ -17,7 +17,7 @@ In all I learned I would highlight two different skills:
 
 ///////////////////////////////
 <img src="onemoretodo.JPG">
-//////////////////<////////////
+//////////////////////////////
 
 For a future update I would like to add the possibility to edit the task, make my app web responsive and use something like firebase to save data.
 I'm happy with the final result and aware of the things I can make in the near future to make it better.
