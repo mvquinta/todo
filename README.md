@@ -2,6 +2,8 @@
 
 Todo List Project made following The Odin Project learning path.
 
+[Live Demo](https://mvquinta.github.io/todo/#)
+
 Main features:
 - Add/Del tasks and projects
 - Set a due date
